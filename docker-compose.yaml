@@ -12,6 +12,8 @@ services:
       - 9090
     ports:
       - 9090:9090
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   node-exporter:
     image: quay.io/prometheus/node-exporter:latest
@@ -20,9 +22,16 @@ services:
       - 9100:9100
     expose:
       - 9100
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
     # TODO: Configure the container carefully to accurately monitor host level metrics.
-    # This may involve setting up appropriate permissions and volume mounts to access host metrics.
-    # See: https://github.com/prometheus/node_exporter?tab=readme-ov-file#docker
 
   
   grafana:
